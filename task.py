@@ -42,9 +42,8 @@ color_orange = (254, 80, 0)
 ## Template to create assets 
 # For Youtube Thumbnail - CovidFeedDaily 
 today = date.today()
-date_today = today.strftime("%B %d, %Y")
-input_file1 = 'YTDailyMobiSource.png'
-input_file2 = 'YTDailyTVSource.png'
+# date_today = today.strftime("%B %d, %Y") #Long full date
+date_today = today.strftime("%b %d") #Short MMM-DD 
 # output_filename = 'ytCovidDaily-'+ today.strftime("%b-%d-%Y")
 
 ## Main function to create
@@ -111,10 +110,15 @@ def runloop(input_file):
 		outputfilename=output_filename,
 		)
 	url_uploaded = dumpToS3(file_created)
-	dumpToAirtable(url_uploaded, input_file)
+	# dumpToAirtable(url_uploaded, input_file)
 
 # Running service
-runloop(input_file1)
-runloop(input_file2)
+input_YTDailyMO = 'YTDailyMobiSource.png'
+input_YTDailyTV = 'YTDailyTVSource.png'
+input_InstaDaily = 'INSTADailyMobiSource.png'
+
+runloop(input_YTDailyMO)
+runloop(input_YTDailyTV)
+runloop(input_InstaDaily)
 
 
