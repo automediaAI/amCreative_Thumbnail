@@ -102,7 +102,8 @@ def dumpToAirtable(inputURL, input_file):
 
 # Main loop that does all actions separately
 def runloop(input_file):
-	output_filename = str(input_file)+ today.strftime("%b-%d-%Y")
+	# output_filename = str(input_file)+ today.strftime("%b-%d-%Y")
+	output_filename = str(input_file)
 	file_created = create_frame(
 		text_entry = date_today,
 		input_file = input_file,
