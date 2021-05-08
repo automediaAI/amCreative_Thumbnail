@@ -6,6 +6,7 @@ python:
   # - "3.8"
 
 before_install:
+  - export TZ=America/Los_Angeles
   # - git config --global user.email "nitinthewiz@gmail.com"
   # - git config --global user.name "Nitin Khanna"
 
