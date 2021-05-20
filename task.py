@@ -49,42 +49,53 @@ date_today = today.strftime("%b %d") #Short MMM-DD
 ## Main function to create
 def create_frame(
 	text_entry,
-	input_file,
+	file_in,
+	input_folder, 
 	file_type,
-	outputfilename
+	template
 	):
 	
-	input_file = 'input/'+input_file
-	print ('Input file path:', input_file)
+	# input_file = 'input/'+input_file
+	input_file = 'input/'+input_folder+'/'+file_in
 	#Loading files or a stream, older code will be files mostly here 
 	if file_type == 'stream':
 		input_image = Image.open(io.BytesIO(input_file)) #for handling data in ioStream <bytes> format
 	else: 
 		input_image = Image.open(input_file) #for normal filename
 
-	# Anchoring where to add text, from https://stackoverflow.com/questions/1970807/center-middle-align-text-with-pil 
-	W, H = input_image.size #Dimensions if input image 
-	draw = ImageDraw.Draw(input_image) #actually create it
-	w,h = draw.textsize(text_entry, font=font_h2) #Dimensions of the text
-	draw.text(((W-w)/2,(H-h)/2), text_entry, font=font_h2, fill=color_white) #To put in middle
-
-	#Saving ouput
-	filename_save = './output/'+outputfilename+'.png'
-	filename_return = outputfilename+'.png'
-	input_image.save(filename_save)
-	print ("✅ New image created..")
-	return filename_return
 	# input_image.show() #to test it
 
+	# Anchoring where to add text, from https://stackoverflow.com/questions/1970807/center-middle-align-text-with-pil 
+	## Template 1 is Date Center, will add more - Needs some minor code changes accordingly
+	if template == 'DateCenter':
+		W, H = input_image.size #Dimensions if input image 
+		draw = ImageDraw.Draw(input_image) #actually create it
+		w,h = draw.textsize(text_entry, font=font_h2) #Dimensions of the text
+		draw.text(((W-w)/2,((H-h)/2)+50), text_entry, font=font_h2, fill=color_white) #To put in middle but slight off from top
+
+		#Saving ouput
+		output_filename = str(file_in)[:-4]+"_Output.png"
+		filename_savepath = './output/'+input_folder+'/'+output_filename
+		filename_return = output_filename
+		
+		input_image.save(filename_savepath)
+		print ("✅ New image created..")
+		return (output_filename, filename_savepath)
+	
+	else:
+		print ('🚫Incorrect template')
+
+
 # Dumping to AWS 
-def dumpToS3(file_name, bucket='amcreativebucket', object_name=None):
+def dumpToS3(file_name, file_path, bucket='amcreativebucket', object_name=None):
     # If S3 object_name was not specified, use file_name
     url_s3 = f"https://{bucket}.s3-us-west-2.amazonaws.com/{file_name}" #Manually creating structure
     object_name = file_name
-    file_path = './output/'+file_name
+    # file_path = './output/'+file_path
     try:
         response = s3.upload_file(file_path, bucket, object_name, ExtraArgs={'ACL':'public-read'}) #Enables public read of file
-        print ("✅ Upload to AWS Success..")
+        print ("✅ Upload to AWS Success: ")
+        # print ("✅ Upload to AWS Success: ",url_s3)
         return url_s3
     except ClientError as e:
         print ('🚫Error uploading to S3: '+str(e))
@@ -100,27 +111,25 @@ def dumpToAirtable(inputURL, input_file):
 	airtable_dump.insert(fields)
 	print ("✅ Upload to Airtable Success.")
 
-# Main loop that does all actions separately
-def runloop(input_file):
-	# output_filename = str(input_file)+ today.strftime("%b-%d-%Y")
-	# output_filename = str(input_file)
-	output_filename = str(input_file)[:-4]+"Output"
-	file_created = create_frame(
-		text_entry = date_today,
-		input_file = input_file,
-		file_type = 'file',
-		outputfilename=output_filename,
-		)
-	url_uploaded = dumpToS3(file_created)
-	# dumpToAirtable(url_uploaded, input_file)
+# Assumes same template for all for now, till we get concept of templates
+def runLoop(workingfolder, template):
+	path = './input/'+workingfolder+'/'
+	files = os.listdir(path)
+	for f in files:
+		if f[-3:] == 'png':
+			# input_file = path+f
+			input_file = f
+			file_created = create_frame(
+				text_entry = date_today,
+				file_in = input_file,
+				input_folder = workingfolder, 
+				file_type = 'file',
+				template = 'DateCenter'
+				)
+			# Getting a tuple back 
+			file_name = file_created[0]
+			file_path = file_created[1]
+			url_uploaded = dumpToS3(file_name, file_path)
 
-# Running service
-input_YTDailyMO = 'YTDailyMobiSource.png'
-input_YTDailyTV = 'YTDailyTVSource.png'
-input_InstaDaily = 'INSTADailyMobiSource.png'
-
-runloop(input_YTDailyMO)
-runloop(input_YTDailyTV)
-runloop(input_InstaDaily)
-
+runLoop('coviddaily', 'DateCenter')
 
