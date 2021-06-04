@@ -12,6 +12,7 @@ import os
 import shortuuid
 from airtable import Airtable
 from datetime import date, datetime, timedelta
+import pytz
 import boto3 #to upload image files to S3
 from botocore.exceptions import ClientError
 
@@ -39,11 +40,17 @@ color_black = (0, 0, 0)
 color_white = (255, 255, 255)
 color_orange = (254, 80, 0)
 
+
+pacific_tz = pytz.timezone("America/Los_Angeles")
+
 ## Template to create assets 
 # For Youtube Thumbnail - CovidFeedDaily 
-today = date.today()
+# today = date.today()
+today = datetime.now(pacific_tz)
+print(today.tzinfo)
 # date_today = today.strftime("%B %d, %Y") #Long full date
 date_today = today.strftime("%b %d") #Short MMM-DD 
+print(date_today)
 # output_filename = 'ytCovidDaily-'+ today.strftime("%b-%d-%Y")
 
 ## Main function to create
