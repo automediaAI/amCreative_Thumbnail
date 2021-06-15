@@ -23,5 +23,11 @@ jobs:
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Run the task
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        PRIVATE_API_KEY_AIRTABLE: ${{ secrets.PRIVATE_API_KEY_AIRTABLE }}
+        PRIVATE_BASE_KEY: ${{ secrets.PRIVATE_BASE_KEY }}
+        PRIVATE_TABLE_NAME_SERVICEDUMP: ${{ secrets.PRIVATE_TABLE_NAME_SERVICEDUMP }}
       run: |
         python task.py
